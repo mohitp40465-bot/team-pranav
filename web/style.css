@@ -1,0 +1,71 @@
+/* Custom Web Styles for SmartRide - Vehicle Rental System */
+
+body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: #0f172a;
+}
+::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #475569;
+}
+
+/* Active tab button styling */
+.active-tab {
+    background: linear-gradient(135deg, #4f46e5, #06b6d4) !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 14px 0 rgba(79, 70, 229, 0.35);
+}
+
+.active-filter {
+    background-color: #4f46e5 !important;
+    color: #ffffff !important;
+}
+
+/* Card hover transitions */
+.stat-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.stat-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(99, 102, 241, 0.4);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+}
+
+.vehicle-card {
+    transition: all 0.25s ease;
+}
+.vehicle-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 15px 30px -10px rgba(0, 0, 0, 0.5);
+}
+
+/* Modal Open */
+.modal.flex {
+    display: flex !important;
+}
+
+.queue-node {
+    animation: fadeInSlide 0.3s ease-out;
+}
+
+@keyframes fadeInSlide {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

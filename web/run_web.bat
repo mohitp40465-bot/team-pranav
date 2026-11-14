@@ -1,0 +1,3 @@
+@echo off
+echo Opening Smart Vehicle Rental Web Portal...
+start "" "%~dp0index.html"

@@ -1,0 +1,3 @@
+BK1000|C101|Aarav Sharma|C101|Honda City|3|6600.00|Completed
+BK1001|C102|Priya Verma|B202|Yamaha R15 V4|2|2050.00|Completed
+BK1002|C103|Rohan Mehta|S302|Ather 450X|4|3040.00|Completed

@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartRide - Vehicle Rental & Fleet Management</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-slate-900 text-slate-100 font-sans antialiased min-h-screen flex flex-col">
+
+    <!-- Top Navigation Bar -->
+    <header class="bg-slate-800/80 backdrop-blur-md border-b border-slate-700/60 sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <!-- Brand Logo -->
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 to-cyan-400 flex items-center justify-center text-white shadow-lg shadow-indigo-500/30">
+                    <i class="fa-solid fa-car-side text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold tracking-tight bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">SmartRide</h1>
+                    <p class="text-xs text-indigo-400 font-medium">Vehicle Rental &amp; Fleet Management</p>
+                </div>
+            </div>
+
+            <!-- Navigation Tabs -->
+            <nav class="hidden md:flex space-x-1 bg-slate-900/60 p-1 rounded-xl border border-slate-700/50">
+                <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-tab active-tab px-4 py-1.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2">
+                    <i class="fa-solid fa-chart-pie text-xs"></i> Dashboard
+                </button>
+                <button onclick="switchTab('fleet')" id="nav-fleet" class="nav-tab px-4 py-1.5 rounded-lg text-sm font-medium text-slate-400 hover:text-white transition-all flex items-center gap-2">
+                    <i class="fa-solid fa-car text-xs"></i> Vehicles
+                </button>
+                <button onclick="switchTab('customers')" id="nav-customers" class="nav-tab px-4 py-1.5 rounded-lg text-sm font-medium text-slate-400 hover:text-white transition-all flex items-center gap-2">
+                    <i class="fa-solid fa-users text-xs"></i> Customers
+                </button>
+                <button onclick="switchTab('rentals')" id="nav-rentals" class="nav-tab px-4 py-1.5 rounded-lg text-sm font-medium text-slate-400 hover:text-white transition-all flex items-center gap-2">
+                    <i class="fa-solid fa-key text-xs"></i> Active Rentals
+                </button>
+                <button onclick="switchTab('queue')" id="nav-queue" class="nav-tab px-4 py-1.5 rounded-lg text-sm font-medium text-slate-400 hover:text-white transition-all flex items-center gap-2 relative">
+                    <i class="fa-solid fa-hourglass-half text-xs"></i> Waitlist
+                    <span id="queue-badge" class="hidden absolute -top-1 -right-1 bg-rose-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold">0</span>
+                </button>
+                <button onclick="switchTab('history')" id="nav-history" class="nav-tab px-4 py-1.5 rounded-lg text-sm font-medium text-slate-400 hover:text-white transition-all flex items-center gap-2">
+                    <i class="fa-solid fa-clock-rotate-left text-xs"></i> History
+                </button>
+            </nav>
+
+            <!-- Quick Action Buttons -->
+            <div class="flex items-center space-x-2">
+                <button onclick="openModal('addVehicleModal')" class="px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-md shadow-indigo-600/30 transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-plus"></i> Add Vehicle
+                </button>
+                <button onclick="resetToSampleData()" title="Reload Sample Demo Data" class="px-2.5 py-1.5 rounded-lg bg-slate-700/60 hover:bg-slate-700 text-slate-300 text-xs transition">
+                    <i class="fa-solid fa-arrow-rotate-right"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full">
+
+        <!-- ============================================================== -->
+        <!-- TAB 1: DASHBOARD -->
+        <!-- ============================================================== -->
+        <section id="tab-dashboard" class="tab-pane space-y-6">
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="stat-card bg-slate-800/60 border border-slate-700/60 rounded-2xl p-4 relative overflow-hidden">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Total Fleet</p>
+                            <h3 id="stat-total-vehicles" class="text-2xl font-extrabold text-white mt-1">0</h3>
+                        </div>
+                        <div class="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center">
+                            <i class="fa-solid fa-car text-base"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3 flex items-center gap-2 text-xs text-slate-400">
+                        <span id="stat-available-vehicles" class="text-emerald-400 font-semibold">0 Available</span> &bull; 
+                        <span id="stat-rented-vehicles" class="text-amber-400 font-semibold">0 Rented</span>
+                    </div>
+                </div>
+
+                <div class="stat-card bg-slate-800/60 border border-slate-700/60 rounded-2xl p-4 relative overflow-hidden">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Total Revenue</p>
+                            <h3 id="stat-total-revenue" class="text-2xl font-extrabold text-emerald-400 mt-1">&#8377;0.00</h3>
+                        </div>
+                        <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
+                            <i class="fa-solid fa-indian-rupee-sign text-base"></i>
+                        </div>
+                    </div>
+                    <p class="mt-3 text-xs text-slate-400">Total earnings to date</p>
+                </div>
+
+                <div class="stat-card bg-slate-800/60 border border-slate-700/60 rounded-2xl p-4 relative overflow-hidden">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Active Bookings</p>
+                            <h3 id="stat-active-rentals" class="text-2xl font-extrabold text-cyan-400 mt-1">0</h3>
+                        </div>
+                        <div class="w-10 h-10 rounded-xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center">
+                            <i class="fa-solid fa-key text-base"></i>
+                        </div>
+                    </div>
+                    <p class="mt-3 text-xs text-slate-400"><span id="stat-completed-rentals" class="text-white font-medium">0</span> completed trips</p>
+                </div>
+
+                <div class="stat-card bg-slate-800/60 border border-slate-700/60 rounded-2xl p-4 relative overflow-hidden">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Waitlist Requests</p>
+                            <h3 id="stat-queue-count" class="text-2xl font-extrabold text-rose-400 mt-1">0</h3>
+                        </div>
+                        <div class="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-400 flex items-center justify-center">
+                            <i class="fa-solid fa-hourglass-start text-base"></i>
+                        </div>
+                    </div>
+                    <p class="mt-3 text-xs text-slate-400">Customers waiting for vehicles</p>
+                </div>
+            </div>
+
+            <!-- Highlights & Insights Row -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Vehicle Availability Breakdown -->
+                <div class="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-5 space-y-4">
+                    <h3 class="text-sm font-semibold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-layer-group text-indigo-400"></i> Fleet Distribution
+                    </h3>
+                    <div class="space-y-3">
+                        <div>
+                            <div class="flex justify-between text-xs mb-1">
+                                <span class="text-slate-300"><i class="fa-solid fa-car text-indigo-400 mr-1.5"></i> Cars</span>
+                                <span id="count-cars" class="font-bold text-white">0</span>
+                            </div>
+                            <div class="w-full bg-slate-700/50 rounded-full h-2">
+                                <div id="bar-cars" class="bg-indigo-500 h-2 rounded-full transition-all" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-xs mb-1">
+                                <span class="text-slate-300"><i class="fa-solid fa-motorcycle text-cyan-400 mr-1.5"></i> Motorcycles &amp; Bikes</span>
+                                <span id="count-bikes" class="font-bold text-white">0</span>
+                            </div>
+                            <div class="w-full bg-slate-700/50 rounded-full h-2">
+                                <div id="bar-bikes" class="bg-cyan-500 h-2 rounded-full transition-all" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-xs mb-1">
+                                <span class="text-slate-300"><i class="fa-solid fa-bolt text-emerald-400 mr-1.5"></i> Scooters (EV &amp; Petrol)</span>
+                                <span id="count-scooters" class="font-bold text-white">0</span>
+                            </div>
+                            <div class="w-full bg-slate-700/50 rounded-full h-2">
+                                <div id="bar-scooters" class="bg-emerald-500 h-2 rounded-full transition-all" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Rental Policy & Pricing Benefits -->
+                <div class="bg-gradient-to-br from-indigo-950/40 via-slate-800/60 to-slate-800/60 border border-indigo-500/20 rounded-2xl p-5 space-y-3">
+                    <h3 class="text-sm font-semibold text-indigo-300 flex items-center gap-2">
+                        <i class="fa-solid fa-tag"></i> Special Offers &amp; Pricing Rules
+                    </h3>
+                    <ul class="text-xs space-y-2.5 text-slate-300">
+                        <li class="flex items-start gap-2">
+                            <span class="text-emerald-400 font-bold"><i class="fa-solid fa-check-circle"></i></span>
+                            <span><strong>Cars:</strong> Flat 5% discount automatically applied on rentals of 7 days or more.</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="text-emerald-400 font-bold"><i class="fa-solid fa-check-circle"></i></span>
+                            <span><strong>Electric Scooters (EV):</strong> 5% Green Mobility subsidy applied on all EV rentals.</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="text-emerald-400 font-bold"><i class="fa-solid fa-check-circle"></i></span>
+                            <span><strong>Sports Bikes:</strong> Nominal &#8377;50 safety helmet and riding gear inclusion.</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Operational Best Practices -->
+                <div class="bg-gradient-to-br from-cyan-950/40 via-slate-800/60 to-slate-800/60 border border-cyan-500/20 rounded-2xl p-5 space-y-3">
+                    <h3 class="text-sm font-semibold text-cyan-300 flex items-center gap-2">
+                        <i class="fa-solid fa-shield-halved"></i> Rental Operations
+                    </h3>
+                    <ul class="text-xs space-y-2.5 text-slate-300">
+                        <li class="flex items-start gap-2">
+                            <span class="text-cyan-400 font-bold"><i class="fa-solid fa-bell"></i></span>
+                            <span><strong>Smart Waitlist Alerts:</strong> Returning a vehicle alerts you immediately if a customer is waiting.</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="text-cyan-400 font-bold"><i class="fa-solid fa-clock"></i></span>
+                            <span><strong>Transparent Billing:</strong> Automatic late fee settlement calculations upon return.</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="text-cyan-400 font-bold"><i class="fa-solid fa-lock"></i></span>
+                            <span><strong>Zero Double Booking:</strong> Vehicles in use are instantly protected from duplicate reservations.</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Recent Activity List -->
+            <div class="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-5 space-y-3">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-sm font-semibold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-key text-indigo-400"></i> Active Ongoing Rentals
+                    </h3>
+                    <button onclick="switchTab('rentals')" class="text-xs text-indigo-400 hover:text-indigo-300 font-medium">View All &rarr;</button>
+                </div>
+                <div id="dashboard-active-rentals" class="space-y-2">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================== -->
+        <!-- TAB 2: FLEET VEHICLES -->
+        <!-- ============================================================== -->
+        <section id="tab-fleet" class="tab-pane hidden space-y-4">
+            <!-- Filter & Search Toolbar -->
+            <div class="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-4 flex flex-col sm:flex-row gap-3 justify-between items-center">
+                <!-- Search Input -->
+                <div class="relative w-full sm:w-80">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                    <input type="text" id="vehicle-search-input" oninput="renderVehicles()" placeholder="Search vehicle ID, name, brand..." class="w-full pl-9 pr-3 py-2 bg-slate-900/80 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500">
+                </div>
+
+                <!-- Type Filters -->
+                <div class="flex flex-wrap gap-1.5 w-full sm:w-auto">
+                    <button onclick="setVehicleFilter('all')" class="filter-btn active-filter px-3 py-1.5 rounded-lg text-xs font-medium" data-filter="all">All</button>
+                    <button onclick="setVehicleFilter('Car')" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white" data-filter="Car">Cars</button>
+                    <button onclick="setVehicleFilter('Bike')" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white" data-filter="Bike">Bikes</button>
+                    <button onclick="setVehicleFilter('Scooter')" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white" data-filter="Scooter">Scooters</button>
+                    <button onclick="setVehicleFilter('available')" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-medium text-emerald-400 hover:text-emerald-300" data-filter="available">Available Only</button>
+                </div>
+            </div>
+
+            <!-- Vehicles Grid -->
+            <div id="vehicles-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Rendered dynamically -->
+            </div>
+        </section>
+
+        <!-- ============================================================== -->
+        <!-- TAB 3: CUSTOMERS -->
+        <!-- ============================================================== -->
+        <section id="tab-customers" class="tab-pane hidden space-y-4">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h2 class="text-base font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-users text-indigo-400"></i> Customer Directory
+                    </h2>
+                    <p class="text-xs text-slate-400">View and register rental customers</p>
+                </div>
+                <button onclick="openModal('addCustomerModal')" class="px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-md transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-user-plus"></i> Register Customer
+                </button>
+            </div>
+
+            <div class="bg-slate-800/60 border border-slate-700/60 rounded-2xl overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-slate-900/60 text-slate-400 uppercase font-semibold border-b border-slate-700">
+                            <tr>
+                                <th class="px-4 py-3">Customer ID</th>
+                                <th class="px-4 py-3">Full Name</th>
+                                <th class="px-4 py-3">Phone Number</th>
+                                <th class="px-4 py-3 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="customers-table-body" class="divide-y divide-slate-700/50 text-slate-300">
+                            <!-- Rendered dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================== -->
+        <!-- TAB 4: ACTIVE RENTALS & RETURN -->
+        <!-- ============================================================== -->
+        <section id="tab-rentals" class="tab-pane hidden space-y-4">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h2 class="text-base font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-key text-cyan-400"></i> Active Ongoing Bookings
+                    </h2>
+                    <p class="text-xs text-slate-400">Manage vehicle returns, settlement, and customer check-ins</p>
+                </div>
+            </div>
+
+            <div class="bg-slate-800/60 border border-slate-700/60 rounded-2xl overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-slate-900/60 text-slate-400 uppercase font-semibold border-b border-slate-700">
+                            <tr>
+                                <th class="px-4 py-3">Booking ID</th>
+                                <th class="px-4 py-3">Customer</th>
+                                <th class="px-4 py-3">Vehicle</th>
+                                <th class="px-4 py-3">Scheduled Days</th>
+                                <th class="px-4 py-3">Estimated Rent</th>
+                                <th class="px-4 py-3">Status</th>
+                                <th class="px-4 py-3 text-right">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="active-rentals-table-body" class="divide-y divide-slate-700/50 text-slate-300">
+                            <!-- Rendered dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================== -->
+        <!-- TAB 5: WAITING LIST -->
+        <!-- ============================================================== -->
+        <section id="tab-queue" class="tab-pane hidden space-y-4">
+            <div class="bg-gradient-to-r from-rose-950/40 via-slate-800/60 to-slate-800/60 border border-rose-500/20 rounded-2xl p-4 flex justify-between items-center">
+                <div>
+                    <h2 class="text-base font-bold text-rose-300 flex items-center gap-2">
+                        <i class="fa-solid fa-hourglass-half"></i> Customer Waitlist
+                    </h2>
+                    <p class="text-xs text-slate-400 mt-0.5">When high-demand vehicles are booked, customers are added to this waitlist. You will be alerted when their vehicle is returned.</p>
+                </div>
+                <span class="px-3 py-1 rounded-full text-xs font-bold bg-rose-500/10 text-rose-400 border border-rose-500/20" id="queue-header-count">0 Waiting</span>
+            </div>
+
+            <div id="queue-empty-state" class="hidden bg-slate-800/60 border border-slate-700/60 rounded-2xl p-12 text-center">
+                <div class="w-12 h-12 rounded-full bg-slate-700/50 text-slate-400 flex items-center justify-center mx-auto mb-3">
+                    <i class="fa-solid fa-check text-lg"></i>
+                </div>
+                <h3 class="text-sm font-semibold text-white">No Customers on Waitlist</h3>
+                <p class="text-xs text-slate-400 mt-1">All vehicles are available or have no pending reservation requests.</p>
+            </div>
+
+            <div id="queue-list" class="space-y-2">
+                <!-- Rendered dynamically -->
+            </div>
+        </section>
+
+        <!-- ============================================================== -->
+        <!-- TAB 6: RENTAL HISTORY -->
+        <!-- ============================================================== -->
+        <section id="tab-history" class="tab-pane hidden space-y-4">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                <div>
+                    <h2 class="text-base font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-clock-rotate-left text-indigo-400"></i> Rental History &amp; Audit Log
+                    </h2>
+                    <p class="text-xs text-slate-400">Permanent record of all past and completed rental transactions</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <input type="text" id="history-search-input" oninput="renderHistory()" placeholder="Filter by Booking or Customer ID..." class="px-3 py-1.5 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500">
+                </div>
+            </div>
+
+            <div class="bg-slate-800/60 border border-slate-700/60 rounded-2xl overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-slate-900/60 text-slate-400 uppercase font-semibold border-b border-slate-700">
+                            <tr>
+                                <th class="px-4 py-3">Book ID</th>
+                                <th class="px-4 py-3">Customer</th>
+                                <th class="px-4 py-3">Vehicle</th>
+                                <th class="px-4 py-3">Days</th>
+                                <th class="px-4 py-3">Total Rent Settlement</th>
+                                <th class="px-4 py-3">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-table-body" class="divide-y divide-slate-700/50 text-slate-300">
+                            <!-- Rendered dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Modals -->
+
+    <!-- 1. Book Vehicle Modal -->
+    <div id="bookVehicleModal" class="modal fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-slate-700 pb-3">
+                <h3 class="text-base font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-key text-indigo-400"></i> Book Vehicle
+                </h3>
+                <button onclick="closeModal('bookVehicleModal')" class="text-slate-400 hover:text-white">&times;</button>
+            </div>
+
+            <div id="book-modal-vehicle-info" class="p-3 bg-slate-900/60 rounded-xl border border-slate-700 text-xs space-y-1">
+                <!-- Vehicle details loaded here -->
+            </div>
+
+            <form id="bookVehicleForm" onsubmit="handleBookSubmit(event)" class="space-y-3 text-xs">
+                <div>
+                    <label class="block text-slate-400 mb-1">Select Customer</label>
+                    <select id="book-customer-select" required class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-indigo-500">
+                        <!-- Options loaded dynamically -->
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-slate-400 mb-1">Rental Duration (Days)</label>
+                    <input type="number" id="book-rental-days" min="1" value="1" oninput="updateRentEstimate()" required class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-indigo-500">
+                </div>
+
+                <div class="p-3 bg-indigo-950/30 border border-indigo-500/20 rounded-xl space-y-1">
+                    <div class="flex justify-between text-slate-400">
+                        <span>Daily Rate:</span>
+                        <span id="book-modal-daily-rate">&#8377;0.00</span>
+                    </div>
+                    <div class="flex justify-between text-slate-400">
+                        <span>Applied Offer:</span>
+                        <span id="book-modal-modifier">Standard Rate</span>
+                    </div>
+                    <div class="flex justify-between text-white font-bold pt-1 border-t border-slate-700">
+                        <span>Estimated Total:</span>
+                        <span id="book-modal-total-rent" class="text-emerald-400">&#8377;0.00</span>
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="closeModal('bookVehicleModal')" class="px-3.5 py-2 rounded-xl bg-slate-700 hover:bg-slate-600 text-white font-medium">Cancel</button>
+                    <button type="submit" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold shadow-lg shadow-indigo-600/30">Confirm Booking</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 2. Return Vehicle Modal -->
+    <div id="returnVehicleModal" class="modal fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-slate-700 pb-3">
+                <h3 class="text-base font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-arrow-rotate-left text-cyan-400"></i> Return &amp; Settle Booking
+                </h3>
+                <button onclick="closeModal('returnVehicleModal')" class="text-slate-400 hover:text-white">&times;</button>
+            </div>
+
+            <div id="return-modal-booking-info" class="p-3 bg-slate-900/60 rounded-xl border border-slate-700 text-xs space-y-1">
+                <!-- Info loaded -->
+            </div>
+
+            <form id="returnVehicleForm" onsubmit="handleReturnSubmit(event)" class="space-y-3 text-xs">
+                <div>
+                    <label class="block text-slate-400 mb-1">Actual Days Vehicle Was Used</label>
+                    <input type="number" id="return-actual-days" min="1" oninput="updateReturnSettlement()" required class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-cyan-500">
+                </div>
+
+                <div class="p-3 bg-cyan-950/30 border border-cyan-500/20 rounded-xl space-y-1">
+                    <div class="flex justify-between text-slate-400">
+                        <span>Original Scheduled:</span>
+                        <span id="return-scheduled-days">0 days</span>
+                    </div>
+                    <div class="flex justify-between text-slate-400">
+                        <span>Late Fee Penalty:</span>
+                        <span id="return-late-penalty">&#8377;0.00</span>
+                    </div>
+                    <div class="flex justify-between text-white font-bold pt-1 border-t border-slate-700">
+                        <span>Final Settlement Amount:</span>
+                        <span id="return-final-amount" class="text-emerald-400">&#8377;0.00</span>
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="closeModal('returnVehicleModal')" class="px-3.5 py-2 rounded-xl bg-slate-700 hover:bg-slate-600 text-white font-medium">Cancel</button>
+                    <button type="submit" class="px-4 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold shadow-lg shadow-cyan-600/30">Complete Return</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 3. Add Vehicle Modal -->
+    <div id="addVehicleModal" class="modal fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-slate-700 pb-3">
+                <h3 class="text-base font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-plus text-indigo-400"></i> Add Vehicle to Fleet
+                </h3>
+                <button onclick="closeModal('addVehicleModal')" class="text-slate-400 hover:text-white">&times;</button>
+            </div>
+
+            <form id="addVehicleForm" onsubmit="handleAddVehicleSubmit(event)" class="space-y-3 text-xs">
+                <div>
+                    <label class="block text-slate-400 mb-1">Vehicle Category</label>
+                    <select id="new-vehicle-type" onchange="toggleVehicleSpecificFields()" required class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white">
+                        <option value="Car">Car</option>
+                        <option value="Bike">Motorcycle / Bike</option>
+                        <option value="Scooter">Scooter</option>
+                    </select>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-slate-400 mb-1">Vehicle ID</label>
+                        <input type="text" id="new-vehicle-id" placeholder="e.g. C105, B205" required class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white">
+                    </div>
+                    <div>
+                        <label class="block text-slate-400 mb-1">Brand</label>
+                        <input type="text" id="new-vehicle-brand" placeholder="e.g. Honda, Tata" required class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-slate-400 mb-1">Model Name</label>
+                    <input type="text" id="new-vehicle-name" placeholder="e.g. Honda City" required class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white">
+                </div>
+
+                <div>
+                    <label class="block text-slate-400 mb-1">Daily Rent Rate (Rs.)</label>
+                    <input type="number" id="new-vehicle-rent" min="50" step="50" placeholder="e.g. 2000" required class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white">
+                </div>
+
+                <!-- Specific Fields -->
+                <div id="car-fields" class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-slate-400 mb-1">Seating Capacity</label>
+                        <input type="number" id="new-car-seats" value="5" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white">
+                    </div>
+                    <div>
+                        <label class="block text-slate-400 mb-1">Fuel Type</label>
+                        <select id="new-car-fuel" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white">
+                            <option value="Petrol">Petrol</option>
+                            <option value="Diesel">Diesel</option>
+                            <option value="Electric">Electric</option>
+                            <option value="CNG">CNG</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="bike-fields" class="grid grid-cols-2 gap-3 hidden">
+                    <div>
+                        <label class="block text-slate-400 mb-1">Engine Displacement (CC)</label>
+                        <input type="number" id="new-bike-cc" value="150" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white">
+                    </div>
+                    <div>
+                        <label class="block text-slate-400 mb-1">Style</label>
+                        <select id="new-bike-category" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white">
+                            <option value="Commuter">Commuter</option>
+                            <option value="Sport">Sport</option>
+                            <option value="Cruiser">Cruiser</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="scooter-fields" class="grid grid-cols-2 gap-3 hidden">
+                    <div>
+                        <label class="block text-slate-400 mb-1">Boot Storage (Liters)</label>
+                        <input type="number" id="new-scooter-boot" value="20" step="0.5" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white">
+                    </div>
+                    <div>
+                        <label class="block text-slate-400 mb-1">Power Source</label>
+                        <select id="new-scooter-electric" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white">
+                            <option value="false">Petrol</option>
+                            <option value="true">Electric (EV)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="closeModal('addVehicleModal')" class="px-3.5 py-2 rounded-xl bg-slate-700 hover:bg-slate-600 text-white font-medium">Cancel</button>
+                    <button type="submit" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold">Add to Fleet</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 4. Register Customer Modal -->
+    <div id="addCustomerModal" class="modal fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-sm w-full p-6 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-slate-700 pb-3">
+                <h3 class="text-base font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-user-plus text-indigo-400"></i> Register Customer
+                </h3>
+                <button onclick="closeModal('addCustomerModal')" class="text-slate-400 hover:text-white">&times;</button>
+            </div>
+
+            <form id="addCustomerForm" onsubmit="handleAddCustomerSubmit(event)" class="space-y-3 text-xs">
+                <div>
+                    <label class="block text-slate-400 mb-1">Full Name</label>
+                    <input type="text" id="new-customer-name" placeholder="e.g. Siddharth Joshi" required class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white">
+                </div>
+                <div>
+                    <label class="block text-slate-400 mb-1">Phone Number</label>
+                    <input type="tel" id="new-customer-phone" placeholder="e.g. 9876543210" pattern="[0-9]{10}" required class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white">
+                </div>
+
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="closeModal('addCustomerModal')" class="px-3.5 py-2 rounded-xl bg-slate-700 hover:bg-slate-600 text-white font-medium">Cancel</button>
+                    <button type="submit" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold">Register</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
+        <div id="toast-content" class="px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 shadow-xl flex items-center gap-3 text-xs text-white">
+            <i id="toast-icon" class="fa-solid fa-circle-check text-emerald-400 text-base"></i>
+            <span id="toast-message">Notification</span>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 border-t border-slate-800 py-4 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate-500">
+            SmartRide &bull; Vehicle Rental &amp; Fleet Management Platform
+        </div>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
